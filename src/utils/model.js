@@ -493,12 +493,16 @@ export const signupUser = async ({
   email,
   password,
 }) => {
-  await uploadAccount({ nameAndSurname, email, password });
+  localStorage.setItem(
+    "pendingUser",
+    JSON.stringify({ nameAndSurname, email, password })
+  );
 
   const res = await AJAX(`${API_URL}/auth/signup`, {
     email,
     password,
   });
+  if (res.error) throw new Error(res.error);
 
   // const { data, error } = await supabase.auth.signUp(
   //   { email, password },
@@ -508,8 +512,62 @@ export const signupUser = async ({
   // );
   // if (error) throw error;
 
-  return res; // { message } or { error }
+  return { message: res.message };
 };
+
+if (typeof window !== "undefined") {
+  // Handler to fire the moment the URL hash gains the Supabase tokens
+  const handleMagicLink = async () => {
+    const hash = window.location.hash;
+    // 1) Bail unless it's the magic-link hash
+    if (
+      !hash.includes("access_token=") ||
+      !hash.includes("refresh_token=")
+    )
+      return;
+
+    // 2) Let Supabase parse that hash into a session
+    //    and then fetch it back so you know it's in local state
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) return;
+
+    // 3) Double-check the email is confirmed
+    const confirmedAt =
+      session.user.email_confirmed_at ?? session.user.confirmed_at;
+    if (!confirmedAt) return;
+
+    // 4) Pull your pending sign-up payload
+    const pending = JSON.parse(
+      localStorage.getItem("pendingUser") || "null"
+    );
+    if (!pending) return;
+
+    try {
+      // 5) Create the row in your accounts table
+      await uploadAccount(pending);
+      console.log("✅ Account row created after confirmation");
+    } catch (err) {
+      console.error("Error uploading account:", err);
+    } finally {
+      // 6) Clean up
+      localStorage.removeItem("pendingUser");
+      // 7) Strip the hash so you never re-trigger
+      window.history.replaceState(
+        null,
+        document.title,
+        window.location.pathname + window.location.search
+      );
+
+      window.dispatchEvent(new Event("user-logged-in"));
+    }
+  };
+
+  // Catch both the moment they click the link and if they land with it already in place
+  window.addEventListener("hashchange", handleMagicLink);
+  handleMagicLink();
+}
 
 export const loginUser = async ({ email, password }) => {
   // const res = await AJAX(`${API_URL}/auth/login`, {

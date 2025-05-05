@@ -19,6 +19,7 @@ import AdminDashboard from "../components/AdminDashboard.js";
 import * as model from "../utils/model.js";
 import { scrollToTop } from "../utils/helpers.js";
 import { RES_PER_PAGE } from "../utils/config.js";
+import { supabase } from "../utils/supabaseClient.js";
 
 export default function Home() {
   // Mounted state to ensure client-only rendering
@@ -76,6 +77,16 @@ export default function Home() {
     useState(false);
   const [adminSmartSearchError, setAdminSmartSearchError] =
     useState(null);
+
+  useEffect(() => {
+    const onUserLoggedIn = () => {
+      const stored = localStorage.getItem("loggedInUser");
+      if (stored) setUser(JSON.parse(stored));
+    };
+    window.addEventListener("user-logged-in", onUserLoggedIn);
+    return () =>
+      window.removeEventListener("user-logged-in", onUserLoggedIn);
+  }, []);
 
   // --- Persistence on mount ---
   useEffect(() => {
