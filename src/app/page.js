@@ -25,6 +25,8 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
+    const storedUser = localStorage.getItem("loggedInUser");
+    if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
   // Search Form
@@ -94,6 +96,10 @@ export default function Home() {
         if (element) {
           element.scrollIntoView({ behavior: "smooth" });
         }
+        return;
+      }
+
+      if (!/^[0-9]/.test(id)) {
         return;
       }
 
@@ -198,7 +204,7 @@ export default function Home() {
     loadFeatured();
   }, []);
 
-  // Login handler
+  // // Login handler
   const handleLogin = async ({ email, password }) => {
     const account = await model.verifyLogin({ email, password });
     if (!account) {
@@ -212,6 +218,22 @@ export default function Home() {
     // localStorage.setItem("user", JSON.stringify(loggedInUser));
     // localStorage.removeItem("loggedInUser");
   };
+
+  // Login
+  // const handleLogin = async ({ email, password }) => {
+  //   try {
+  //     const { error, session } = await model.loginUser({
+  //       email,
+  //       password,
+  //     });
+  //     if (error) throw new Error(error);
+
+  //     const loggedInUser = model.state.user;
+  //     setUser(loggedInUser);
+  //   } catch (err) {
+  //     console.error(err.message);
+  //   }
+  // };
 
   const handleLogout = async () => {
     // Call your model functions to clear global state and local storage
@@ -229,12 +251,34 @@ export default function Home() {
     preloadDomains();
   }, [isSignUpModalOpen]);
 
-  const handleSignUp = async (newAccount) => {
-    // This calls model.uploadAccount, similar to controlSignup in your controller.js :contentReference[oaicite:1]{index=1}
-    await model.uploadAccount(newAccount);
-    // Optionally update the user state after sign up:
-    const loggedInUser = model.state.user;
-    setUser(loggedInUser);
+  // const handleSignUp = async (newAccount) => {
+  //   // This calls model.uploadAccount, similar to controlSignup in your controller.js :contentReference[oaicite:1]{index=1}
+  //   await model.uploadAccount(newAccount);
+  //   // Optionally update the user state after sign up:
+  //   const loggedInUser = model.state.user;
+  //   setUser(loggedInUser);
+  // };
+
+  // Signup
+  const handleSignUp = async ({
+    nameAndSurname,
+    email,
+    password,
+  }) => {
+    try {
+      const { error, message } = await model.signupUser({
+        nameAndSurname,
+        email,
+        password,
+      });
+      if (error) throw new Error(error);
+      alert(message); // “Check your email…”
+
+      // const loggedInUser = model.state.user;
+      // setUser(loggedInUser);
+    } catch (err) {
+      console.error(err.message);
+    }
   };
 
   const handleApply = async (formData) => {

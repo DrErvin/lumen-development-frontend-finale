@@ -6,6 +6,7 @@ import {
 } from "./config.js";
 import { AJAX, sendFormData } from "./helpers.js";
 import { calculateRemainingDays } from "./helpers.js";
+import { supabase } from "./supabaseClient";
 
 export const state = {
   opportunity: {},
@@ -238,8 +239,10 @@ export const uploadOpportunity = async function (newOpportunity) {
 
 export const verifyLogin = async function (data) {
   try {
+    console.log("verifyLogin was called here!");
     // Fetch all accounts from the API
     const accounts = await AJAX(`${API_URL}/accounts`);
+    console.log("Account table: ", accounts);
 
     // Find the account with matching email and password
     const account = accounts.find(
@@ -252,8 +255,10 @@ export const verifyLogin = async function (data) {
       state.user = createUserObject(account);
 
       saveUserToLocalStorage();
+      console.log("Account should be stored now!");
     }
 
+    console.log("account data: ", account);
     // Return the account if found, otherwise return null
     return account || null;
   } catch (err) {
@@ -396,7 +401,7 @@ export const validateEmail = async function (email) {
       const normalizedDomain = domainParts.slice(index).join(".");
       return (
         state.universityDomainsCache.includes(normalizedDomain) ||
-        ["company.com"].includes(normalizedDomain)
+        ["company.com", "gmail.com"].includes(normalizedDomain)
       );
     });
 
@@ -481,6 +486,46 @@ export const uploadAccount = async function (newAccount) {
     console.error("Error uploading account:", err);
     throw err;
   }
+};
+
+export const signupUser = async ({
+  nameAndSurname,
+  email,
+  password,
+}) => {
+  await uploadAccount({ nameAndSurname, email, password });
+
+  const res = await AJAX(`${API_URL}/auth/signup`, {
+    email,
+    password,
+  });
+
+  // const { data, error } = await supabase.auth.signUp(
+  //   { email, password },
+  //   {
+  //     emailRedirectTo: `${window.location.origin}/auth/callback`,
+  //   }
+  // );
+  // if (error) throw error;
+
+  return res; // { message } or { error }
+};
+
+export const loginUser = async ({ email, password }) => {
+  // const res = await AJAX(`${API_URL}/auth/login`, {
+  //   email,
+  //   password,
+  // });
+  // if (res.session) {
+  //   // store the JWT
+  //   localStorage.setItem(
+  //     "supabaseSession",
+  //     JSON.stringify(res.session)
+  //   );
+  // }
+
+  await verifyLogin({ email, password });
+  // return res; // { session, user } or { error }
 };
 
 export const submitApplication = async function (formData) {
