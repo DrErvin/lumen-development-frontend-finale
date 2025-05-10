@@ -51,7 +51,7 @@ export default function SignupModal({
     try {
       // onSignUp should upload the new account (e.g. using model.uploadAccount)
       await onSignUp({ nameAndSurname: name, email, password });
-      setSuccess("You have been successfully signed up!");
+      setSuccess("Confirmation Email has been sent!");
       // Clear fields
       setName("");
       setEmail("");

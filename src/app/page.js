@@ -16,10 +16,10 @@ import ApplyModal from "../components/ApplyModal.js";
 import OpportunityDetails from "../components/OpportunityDetails.js";
 import PublishModal from "../components/PublishModal.js";
 import AdminDashboard from "../components/AdminDashboard.js";
+import SuccessMessage from "../components/SuccessMessage.js";
 import * as model from "../utils/model.js";
 import { scrollToTop } from "../utils/helpers.js";
-import { RES_PER_PAGE } from "../utils/config.js";
-import { supabase } from "../utils/supabaseClient.js";
+import { RES_PER_PAGE, MODAL_CLOSE_SEC } from "../utils/config.js";
 
 export default function Home() {
   // Mounted state to ensure client-only rendering
@@ -54,6 +54,10 @@ export default function Home() {
 
   // Signup modal
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const [isSuccessOverlayOpen, setIsSuccessOverlayOpen] =
+    useState(false);
+  const [successOverlayMessage, setSuccessOverlayMessage] =
+    useState("");
 
   // Opportunity Details
   const [selectedOpportunity, setSelectedOpportunity] =
@@ -82,6 +86,15 @@ export default function Home() {
     const onUserLoggedIn = () => {
       const stored = localStorage.getItem("loggedInUser");
       if (stored) setUser(JSON.parse(stored));
+
+      setSuccessOverlayMessage(
+        "You have been successfully signed in"
+      );
+      setIsSuccessOverlayOpen(true);
+      setTimeout(
+        () => setIsSuccessOverlayOpen(false),
+        MODAL_CLOSE_SEC * 1000
+      );
     };
     window.addEventListener("user-logged-in", onUserLoggedIn);
     return () =>
@@ -483,6 +496,25 @@ export default function Home() {
               </div>
             </nav>
           </header>
+
+          {isSuccessOverlayOpen && (
+            <div className="signup-modal">
+              <div
+                className="overlay overlay--signup"
+                onClick={() => setIsSuccessOverlayOpen(false)}
+              ></div>
+              <div className="signup-form-window fade-in">
+                <button
+                  className="btn--close-modal signup-btn--close-modal"
+                  onClick={() => setIsSuccessOverlayOpen(false)}
+                >
+                  &times;
+                </button>
+
+                <SuccessMessage text={successOverlayMessage} />
+              </div>
+            </div>
+          )}
 
           {/* Login Modal */}
           <LoginModal
