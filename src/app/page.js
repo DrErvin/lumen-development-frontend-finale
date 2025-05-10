@@ -420,8 +420,8 @@ export default function Home() {
                 alt="Company logo"
                 className="nav__logo"
                 id="logo"
-                width={83}
-                height={56}
+                width={130}
+                height={90}
               />
               <ul className="nav__links">
                 <li className="nav__item">
