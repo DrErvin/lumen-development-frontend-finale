@@ -29,7 +29,7 @@ class PDFView {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.setTextColor(255, 255, 255);
-    doc.text("Company Opportunity", 25, 25);
+    doc.text(`${opportunity.company} opportunity`, 25, 25);
     doc.text(`${opportunity.title}`, 25, 33);
 
     // Opportunity Information in Header
@@ -142,7 +142,7 @@ class PDFView {
     doc.setTextColor(0, 0, 0);
     // Footer Text
     const footerText = [
-      "The Company Inc.",
+      `${opportunity.company} Inc.`,
       `Contact: ${opportunity.contactPerson}`,
       `${opportunity.contactPersonEmail}`,
     ];

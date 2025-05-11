@@ -54,6 +54,7 @@ const createUserObject = function (account) {
     id: account.id,
     accountType: account.id.startsWith("s-") ? "student" : "company",
     name_and_surname: account.name_and_surname || "",
+    company_name: account.company_name || "",
     // id: user.id,
     // nameAndSurname: user.name_and_surname || '',
     // email: user.email || '',
@@ -140,6 +141,7 @@ export const loadSearchResults = async function (query) {
       location: opportunity.location,
       title: opportunity.title,
       experience: opportunity.experienceRequired,
+      company: opportunity.company,
       deadline: calculateRemainingDays(opportunity.endingDate),
     }));
 
@@ -191,13 +193,22 @@ export const uploadOpportunity = async function (newOpportunity) {
       ? newOpportunity.benefits.split(";").map((ben) => ben.trim())
       : [];
 
+    let companyName = "Company Name";
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("loggedInUser");
+      if (stored) {
+        const user = JSON.parse(stored);
+        companyName = user.company_name || companyName;
+      }
+    }
+
     // Create opportunity object
     const opportunity = {
       id: Date.now(), // Timestamp-based numeric ID
       type: newOpportunity.type,
       fieldOfStudy: newOpportunity.fieldOfStudy,
       title: newOpportunity.title,
-      company: "Company Name",
+      company: companyName,
       location: newOpportunity.location,
       description: newOpportunity.description,
       qualificationsAndRequirements, // Processed field
@@ -417,6 +428,11 @@ export const validateEmail = async function (email) {
 
 export const generateUserInfo = async function (email) {
   try {
+    const role =
+      typeof window !== "undefined"
+        ? localStorage.getItem("browseAs") || "student"
+        : "student";
+
     // Extract the domain from the email
     const emailDomain = email.split("@")[1];
 
@@ -425,9 +441,11 @@ export const generateUserInfo = async function (email) {
     const normalizedDomain = domainParts.slice(-2).join(".");
 
     // Determine if it's a Company or university domain
-    const isCompanyDomain = normalizedDomain === "company.com";
-    const idPrefix = isCompanyDomain ? "c-" : "s-";
-    const account_type = isCompanyDomain ? "company" : "student";
+    // const isCompanyDomain = normalizedDomain === "company.com";
+    // const idPrefix = isCompanyDomain ? "c-" : "s-";
+    // const account_type = isCompanyDomain ? "company" : "student";
+    const idPrefix = role === "company" ? "c-" : "s-";
+    const account_type = role;
 
     // Default user object
     const userInfo = {
@@ -438,7 +456,7 @@ export const generateUserInfo = async function (email) {
       university_location: null,
     };
 
-    if (isCompanyDomain) return userInfo;
+    if (role === "company") return userInfo;
 
     // Fetch university details only if it's a university domain
     // if (!isCompanyDomain) {
@@ -471,6 +489,9 @@ export const uploadAccount = async function (newAccount) {
       ...userInfo, // Use generated user info
       name_and_surname: newAccount.nameAndSurname,
       password: newAccount.password,
+      ...(newAccount.companyName && {
+        company_name: newAccount.companyName,
+      }),
     };
 
     // Upload to the API
@@ -492,10 +513,11 @@ export const signupUser = async ({
   nameAndSurname,
   email,
   password,
+  companyName,
 }) => {
   localStorage.setItem(
     "pendingUser",
-    JSON.stringify({ nameAndSurname, email, password })
+    JSON.stringify({ nameAndSurname, email, password, companyName })
   );
 
   const res = await AJAX(`${API_URL}/auth/signup`, {

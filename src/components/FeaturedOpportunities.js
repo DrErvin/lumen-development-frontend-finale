@@ -20,6 +20,12 @@ export default function FeaturedOpportunities({
           <p>
             {opportunity.type || "Unknown Type"} -{" "}
             {opportunity.location || "Location not specified"}
+            {opportunity.company && (
+              <>
+                <br />
+                {opportunity.company}
+              </>
+            )}
           </p>
           <a
             href={`#${opportunity.id}`}

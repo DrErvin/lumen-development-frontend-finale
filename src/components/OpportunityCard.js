@@ -11,7 +11,14 @@ export default function OpportunityCard({ opportunity }) {
         height={40}
       />
       <div className="card-info">
-        <h3 className="card-type">{opportunity.type || "N/A"}</h3>
+        <h3 className="card-type">
+          {opportunity.type || "N/A"}
+          {opportunity.company && (
+            <>
+              {" \u2014"} {opportunity.company}
+            </>
+          )}
+        </h3>
         <h2 className="card-title">
           {opportunity.title || "Untitled Opportunity"}
         </h2>

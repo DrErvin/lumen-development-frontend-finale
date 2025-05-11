@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { FaHandshake } from "react-icons/fa";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -13,20 +14,22 @@ export default function LandingPage() {
   return (
     <div className="container landing-main">
       <div className="landing-card">
-        <h1 className="intro-title">Welcome to Lumen Development</h1>
+        <h1 className="intro-title">
+          Welcome to Student Company Platfrom
+        </h1>
         <p className="intro-text">Browse as:</p>
         <div className="landing-btn-group">
           <button
             className="landing-btn"
             onClick={() => handleSelect("student")}
           >
-            Sign up as Student
+            Student/Guest
           </button>
           <button
             className="landing-btn"
             onClick={() => handleSelect("company")}
           >
-            Sign up as Company
+            Company
           </button>
         </div>
       </div>
@@ -54,7 +57,8 @@ export default function LandingPage() {
             </svg>
             <h3>Create Your Profile</h3>
             <p>
-              Set up your personal or company profile to get started.
+              Complete a personal or company profile to unlock the
+              ecosystem’s full potential.
             </p>
           </div>
           <div className="hiw-step">
@@ -91,34 +95,19 @@ export default function LandingPage() {
           </div>
           <div className="hiw-step">
             {/* Handshake SVG */}
-            <svg
-              width="48"
-              height="48"
-              viewBox="0 0 48 48"
-              fill="none"
-            >
-              <circle cx="24" cy="24" r="24" fill="#E3F0FF" />
-              <path
-                d="M16 28l8 8 8-8"
-                stroke="#1976D2"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M16 20v8h16v-8"
-                stroke="#1976D2"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <circle cx="20" cy="20" r="2" fill="#1976D2" />
-              <circle cx="28" cy="20" r="2" fill="#1976D2" />
-            </svg>
+            <FaHandshake
+              size={33}
+              style={{
+                backgroundColor: "#E3F0FF",
+                color: "#1976D2",
+                padding: "8px",
+                borderRadius: "9999px",
+              }}
+            />
             <h3>Connect &amp; Grow</h3>
             <p>
-              Build relationships and grow together in the Lumen
-              community.
+              Collaborate with leading universities and companies to
+              advance together.
             </p>
           </div>
         </div>

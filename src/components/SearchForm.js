@@ -9,7 +9,7 @@ export default function SearchForm({ onSearch }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("handleSubmit was called");
+    // console.log("handleSubmit was called");
     // Build the query object
     const query = { location, titleOrKeyword, fieldOfStudy, type };
     // Call the onSearch callback prop with the query

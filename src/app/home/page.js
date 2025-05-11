@@ -277,6 +277,8 @@ export default function Home() {
     const loggedInUser = model.state.user;
     setUser(loggedInUser);
 
+    setMustLogin(false);
+
     // Save only one key ("user") in localStorage and remove any extra key.
     // localStorage.setItem("user", JSON.stringify(loggedInUser));
     // localStorage.removeItem("loggedInUser");
@@ -303,6 +305,8 @@ export default function Home() {
     model.clearState();
     model.clearLocalStorage();
     setUser(null);
+
+    setMustLogin(false);
   };
 
   useEffect(() => {
@@ -331,12 +335,14 @@ export default function Home() {
     nameAndSurname,
     email,
     password,
+    companyName,
   }) => {
     try {
       const { error, message } = await model.signupUser({
         nameAndSurname,
         email,
         password,
+        companyName,
       });
       if (error) throw new Error(error);
       alert(message); // “Check your email…”
@@ -485,16 +491,18 @@ export default function Home() {
                     Home
                   </Link>
                 </li>
-                <li className="nav__item">
-                  <a
-                    className="nav__link"
-                    id="admin-btn"
-                    href="#"
-                    onClick={showAdminDashboard}
-                  >
-                    Admin Dashboard
-                  </a>
-                </li>
+                {user?.accountType === "company" && (
+                  <li className="nav__item">
+                    <a
+                      className="nav__link"
+                      id="admin-btn"
+                      href="#"
+                      onClick={showAdminDashboard}
+                    >
+                      Admin Dashboard
+                    </a>
+                  </li>
+                )}
                 <li className="nav__item">
                   <a className="nav__link" href="#featured-section">
                     Featured
@@ -507,22 +515,15 @@ export default function Home() {
                 </li>
               </ul>
               <div className="nav__buttons">
-                <button
-                  className="nav__button"
-                  id="publishOpportunities"
-                  onClick={() => {
-                    // Only allow if user is logged in as a Company user.
-                    if (!user || user.accountType !== "company") {
-                      alert(
-                        "You must be logged in as a Company user to publish."
-                      );
-                      return;
-                    }
-                    setIsPublishModalOpen(true);
-                  }}
-                >
-                  Publish Opportunity
-                </button>
+                {user?.accountType === "company" && (
+                  <button
+                    className="nav__button"
+                    id="publishOpportunities"
+                    onClick={() => setIsPublishModalOpen(true)}
+                  >
+                    Publish Opportunity
+                  </button>
+                )}
                 <button
                   className="nav__button"
                   id="logInSignUp"
@@ -663,7 +664,7 @@ export default function Home() {
                 ) : (
                   <div className="container">
                     <h1 className="intro-title">
-                      Headstart your career with the Company
+                      Headstart your career with the best companies
                     </h1>
                     <p className="intro-text">
                       Search from thousands of student opportunities
@@ -735,10 +736,12 @@ export default function Home() {
 
           {/* Newsletter Subscription Section */}
           <section id="newsletter-section" className="newsletter">
-            <h2>Top Company opportunities in your inbox</h2>
+            <h2>
+              Top career and research opportunities in your inbox
+            </h2>
             <p>
-              Subscribe to the Company Portal newsletter to recieve
-              latest opportunities once a week.
+              Subscribe to the Student-Company Platform newsletter to
+              recieve latest opportunities once a week.
             </p>
             <form action="#">
               <div className="select-field">
@@ -790,7 +793,7 @@ export default function Home() {
           <footer className="main-footer">
             <div className="container">
               <p>
-                &copy; 2025 The Company Student Platfrom. All Rights
+                &copy; 2025 Student-Company Platfrom. All Rights
                 Reserved.
               </p>
             </div>

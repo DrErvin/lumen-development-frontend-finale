@@ -32,14 +32,19 @@ export default function OpportunityDetails({
                 src="/img/logo.webp"
                 alt="Company Logo"
                 className="company-logo"
-                width={107}
-                height={72}
+                width={115}
+                height={85}
               />
               <h1 className="opportunity-title">
                 {opportunity.title || "Untitled Opportunity"}
               </h1>
               <p className="opportunity-type">
                 {opportunity.type || "N/A"}
+                {opportunity.company && (
+                  <>
+                    {" \u2014"} {opportunity.company}
+                  </>
+                )}
               </p>
               <p className="opportunity-location">
                 <svg className="icon-opport-header">
@@ -143,7 +148,7 @@ export default function OpportunityDetails({
               <h2>Contact Person</h2>
               <div className="contact-person-details">
                 <Image
-                  src="/img/logo.webp"
+                  src="/img/logo2.webp"
                   alt="Contact Person"
                   className="contact-person-image"
                   width={120}

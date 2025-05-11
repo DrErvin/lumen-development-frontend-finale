@@ -12,6 +12,7 @@ export default function SignupModal({
   mustSignUp = false,
 }) {
   const [name, setName] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailValid, setEmailValid] = useState(true);
@@ -63,7 +64,12 @@ export default function SignupModal({
     setError(null);
     try {
       // onSignUp should upload the new account (e.g. using model.uploadAccount)
-      await onSignUp({ nameAndSurname: name, email, password });
+      await onSignUp({
+        nameAndSurname: name,
+        email,
+        password,
+        ...(role === "company" && { companyName }),
+      });
       setSuccess("Confirmation Email has been sent!");
       // Clear fields
       setName("");
@@ -123,6 +129,21 @@ export default function SignupModal({
                     process.
                   </p>
                 </div>
+              )}
+
+              {role === "company" && (
+                <>
+                  <label htmlFor="companyName">Company Name</label>
+                  <input
+                    id="companyName"
+                    name="companyName"
+                    type="text"
+                    placeholder="Enter your company name"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    required
+                  />
+                </>
               )}
 
               {/* <div className="disclaimer">
