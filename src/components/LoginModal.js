@@ -8,6 +8,8 @@ export default function LoginModal({
   onClose,
   onLogin,
   onShowSignUp,
+  role,
+  mustLogin = false,
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,6 +19,13 @@ export default function LoginModal({
   const [success, setSuccess] = useState("");
 
   if (!isOpen) return null; // Do not render if modal is closed
+
+  const heading =
+    role === "company" ? "Company Log In" : "Student Log In";
+  const disclaimer =
+    role === "company"
+      ? "Login to access company features like admin dashboard and publish opportunities."
+      : "Login to apply directly through the platform without lengthy application process.";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,14 +53,20 @@ export default function LoginModal({
   return (
     <div className="login-modal">
       {/* Overlay for the modal */}
-      <div className="overlay overlay--login" onClick={onClose}></div>
+      <div
+        className="overlay overlay--login"
+        onClick={mustLogin ? undefined : onClose}
+      ></div>
+
       <div className="login-form-window fade-in">
-        <button
-          className="btn--close-modal login-btn--close-modal"
-          onClick={onClose}
-        >
-          &times;
-        </button>
+        {!mustLogin && (
+          <button
+            className="btn--close-modal login-btn--close-modal"
+            onClick={onClose}
+          >
+            &times;
+          </button>
+        )}
         {success ? (
           // Render success message in place of the form
           <div className="message">
@@ -71,7 +86,11 @@ export default function LoginModal({
           // Render the login form
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="login__column">
-              <h3 className="login__heading">Log In</h3>
+              <h3 className="login__heading">{heading}</h3>
+
+              <div className="disclaimer">
+                <p>{disclaimer}</p>
+              </div>
 
               <label htmlFor="loginEmail">Email</label>
               <input

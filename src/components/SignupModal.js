@@ -8,6 +8,8 @@ export default function SignupModal({
   onClose,
   onSignUp,
   onValidateEmail,
+  role,
+  mustSignUp = false,
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,8 +21,9 @@ export default function SignupModal({
 
   // Validate email when it changes
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !onValidateEmail) return;
 
+    let cancelled = false;
     async function validate() {
       // Skip validation if email is empty
       if (email.trim() === "") {
@@ -29,20 +32,30 @@ export default function SignupModal({
       }
       if (onValidateEmail) {
         const valid = await onValidateEmail(email);
-        setEmailValid(valid);
+        if (!cancelled) setEmailValid(valid);
       }
     }
     validate();
+    return () => {
+      cancelled = true;
+    };
   }, [email, onValidateEmail, isOpen]);
 
   if (!isOpen) return null;
 
+  const heading =
+    role === "company" ? "Company Sign Up" : "Student Sign Up";
+  const emailNote =
+    role === "company"
+      ? "please use your company email address"
+      : "please use your university email address";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Prevent submission if email domain is invalid
-    if (!emailValid) {
+    if (onValidateEmail && !emailValid) {
       setError(
-        "Invalid email domain. Please use your University or Company email."
+        "Invalid email domain. Please use your University email."
       );
       return;
     }
@@ -72,15 +85,18 @@ export default function SignupModal({
     <div className="signup-modal">
       <div
         className="overlay overlay--signup"
-        onClick={onClose}
+        onClick={mustSignUp ? undefined : onClose}
       ></div>
       <div className="signup-form-window fade-in">
-        <button
-          className="btn--close-modal signup-btn--close-modal"
-          onClick={onClose}
-        >
-          &times;
-        </button>
+        {!mustSignUp && (
+          <button
+            className="btn--close-modal signup-btn--close-modal"
+            onClick={onClose}
+          >
+            &times;
+          </button>
+        )}
+
         {success ? (
           <div className="message">
             <svg>
@@ -97,13 +113,24 @@ export default function SignupModal({
         ) : (
           <form className="signup-form" onSubmit={handleSubmit}>
             <div className="signup__column">
-              <h3 className="signup__heading">Sign Up</h3>
-              <div className="disclaimer">
+              <h3 className="signup__heading">{heading}</h3>
+
+              {role === "student" && (
+                <div className="disclaimer">
+                  <p>
+                    We use the data to enhance your user journey on
+                    our platform by simplifying the application
+                    process.
+                  </p>
+                </div>
+              )}
+
+              {/* <div className="disclaimer">
                 <p>
                   We use the data to enhance your user journey on our
                   platform by simplifying the application process.
                 </p>
-              </div>
+              </div> */}
               <label htmlFor="name">Name and Surname</label>
               <input
                 id="name"
@@ -115,10 +142,7 @@ export default function SignupModal({
                 required
               />
               <label htmlFor="signUpEmail">
-                Email{" "}
-                <span className="note">
-                  please use your university or company address
-                </span>
+                Email <span className="note">{emailNote}</span>
               </label>
               <input
                 id="signUpEmail"

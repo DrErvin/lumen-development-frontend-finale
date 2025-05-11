@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import SearchForm from "../../components/SearchForm.js";
 import ResultsList from "../../components/ResultsList.js";
 import ErrorMessage from "../../components/ErrorMessage.js";
@@ -24,9 +24,28 @@ import { RES_PER_PAGE, MODAL_CLOSE_SEC } from "../../utils/config.js";
 
 export default function Home() {
   const searchParams = useSearchParams();
-  const role =
-    searchParams.get("role") || localStorage.getItem("browseAs");
-  console.log(role);
+  const router = useRouter();
+  const [role, setRole] = useState("");
+  const [mustLogin, setMustLogin] = useState(false);
+  const [mustSignUp, setMustSignUp] = useState(false);
+
+  useEffect(() => {
+    const fromUrl = searchParams.get("role");
+    const fromStorage = window.localStorage.getItem("browseAs");
+    setRole(fromUrl ?? fromStorage ?? "");
+
+    if (fromUrl === "company") {
+      setMustLogin(true);
+      setMustSignUp(true);
+    }
+  }, [searchParams]);
+
+  // console.log("Current role saved: ", role);
+
+  // const role =
+  //   searchParams.get("role") ||
+  //   window.localStorage.getItem("browseAs");
+  // console.log(role);
 
   // Mounted state to ensure client-only rendering
   const [mounted, setMounted] = useState(false);
@@ -97,6 +116,8 @@ export default function Home() {
         "You have been successfully signed in"
       );
       setIsSuccessOverlayOpen(true);
+      setMustLogin(false);
+
       setTimeout(
         () => setIsSuccessOverlayOpen(false),
         MODAL_CLOSE_SEC * 1000
@@ -106,6 +127,18 @@ export default function Home() {
     return () =>
       window.removeEventListener("user-logged-in", onUserLoggedIn);
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    if (mustLogin && !user) {
+      setIsLoginModalOpen(true);
+
+      router.replace("/home", { shallow: true });
+    }
+    // if (!user && role === "student") {
+    //   setIsSignUpModalOpen(true);
+    // }
+  }, [mustLogin, user, mounted, router]);
 
   // --- Persistence on mount ---
   useEffect(() => {
@@ -274,12 +307,16 @@ export default function Home() {
 
   useEffect(() => {
     async function preloadDomains() {
-      if (isSignUpModalOpen && !model.areUniversitiesCached()) {
+      if (
+        isSignUpModalOpen &&
+        !model.areUniversitiesCached() &&
+        role === "student"
+      ) {
         await model.preloadUniversityDomains();
       }
     }
     preloadDomains();
-  }, [isSignUpModalOpen]);
+  }, [isSignUpModalOpen, role]);
 
   // const handleSignUp = async (newAccount) => {
   //   // This calls model.uploadAccount, similar to controlSignup in your controller.js :contentReference[oaicite:1]{index=1}
@@ -304,6 +341,7 @@ export default function Home() {
       if (error) throw new Error(error);
       alert(message); // “Check your email…”
 
+      setMustSignUp(false);
       // const loggedInUser = model.state.user;
       // setUser(loggedInUser);
     } catch (err) {
@@ -432,7 +470,7 @@ export default function Home() {
               <ul className="nav__links">
                 <li className="nav__item">
                   <Link
-                    href="/"
+                    href="/home"
                     className="nav__link"
                     id="homeBtn"
                     onClick={() => {
@@ -528,6 +566,8 @@ export default function Home() {
             onClose={() => setIsLoginModalOpen(false)}
             onLogin={handleLogin}
             onShowSignUp={() => setIsSignUpModalOpen(true)}
+            role={role}
+            mustLogin={mustLogin}
           />
 
           {/* Logout Modal */}
@@ -546,7 +586,11 @@ export default function Home() {
               isOpen={isSignUpModalOpen}
               onClose={() => setIsSignUpModalOpen(false)}
               onSignUp={handleSignUp}
-              onValidateEmail={model.validateEmail} // Pass the model's validateEmail function
+              onValidateEmail={
+                role === "student" ? model.validateEmail : undefined
+              }
+              role={role}
+              mustSignUp={mustSignUp}
             />
           )}
 

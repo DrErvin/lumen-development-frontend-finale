@@ -401,7 +401,7 @@ export const validateEmail = async function (email) {
       const normalizedDomain = domainParts.slice(index).join(".");
       return (
         state.universityDomainsCache.includes(normalizedDomain) ||
-        ["company.com", "gmail.com"].includes(normalizedDomain)
+        ["company.com"].includes(normalizedDomain)
       );
     });
 
